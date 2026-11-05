@@ -1,0 +1,10 @@
+{
+    "sizes": {
+        "bar": {
+            "innerWidth": 30
+        },
+        "sidebar": {
+            "width": 400
+        }
+    }
+}
