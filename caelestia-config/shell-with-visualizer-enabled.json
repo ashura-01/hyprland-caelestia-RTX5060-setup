@@ -1,0 +1,163 @@
+{
+    "appearance": {
+        "anim": {
+            "durations": {
+                "scale": 0.3
+            }
+        },
+        "font": {
+            "scale": 0.8
+        },
+        "padding": {
+            "scale": 0.5
+        },
+        "rounding": {
+            "scale": 0.5
+        },
+        "spacing": {
+            "scale": 2
+        },
+        "transparency": {
+            "enabled": false
+        }
+    },
+    "background": {
+        "enabled": true,
+        "desktopClock": {
+            "background": {
+                "blur": false,
+                "enabled": true,
+                "opacity": 0.5
+            },
+            "enabled": true,
+            "position": "bottom-right",
+            "shadow": {
+                "enabled": true
+            }
+        },
+        "visualiser": {
+            "enabled": true,
+            "autoHide": false,
+            "rounding": 1,
+            "spacing": 1
+        }
+    },
+    "bar": {
+        "clock": {
+            "background": true,
+            "showDate": true,
+            "showSeconds": false
+        },
+        "popouts": {
+            "tray": false
+        },
+        "statusIcons": [
+            {
+                "enabled": true,
+                "id": "network"
+            },
+            {
+                "enabled": true,
+                "id": "bluetooth"
+            },
+            {
+                "enabled": true,
+                "id": "audio"
+            },
+            {
+                "enabled": true,
+                "id": "microphone"
+            },
+            {
+                "enabled": true,
+                "id": "lockStatus"
+            },
+            {
+                "enabled": false,
+                "id": "kbLayout"
+            },
+            {
+                "enabled": false,
+                "id": "battery"
+            }
+        ],
+        "tray": {
+            "compact": true
+        },
+        "workspaces": {
+            "activeIndicator": true,
+            "activeLabel": "",
+            "activeTrail": true,
+            "displayType": "Text",
+            "label": "",
+            "occupiedBg": true,
+            "occupiedLabel": "",
+            "showUnoccupied": true,
+            "showWindows": false,
+            "showWindowsOnSpecialWorkspaces": true,
+            "shown": 5
+        }
+    },
+    "dashboard": {
+        "mediaUpdateInterval": 5000,
+        "performance": {
+            "showBattery": false
+        },
+        "resourceUpdateInterval": 5000
+    },
+    "general": {
+        "apps": {
+            "explorer": [
+                "dolphin"
+            ]
+        },
+        "logo": "/usr/share/pixmaps/archlinux-logo.svg"
+    },
+    "launcher": {
+        "useFuzzy": {
+            "wallpapers": true
+        }
+    },
+    "nexus": {
+        "networkRescanInterval": 120000
+    },
+    "paths": {
+        "sessionGif": "/home/ashura/Pictures/Wallpapers/gifs/purple.gif"
+    },
+    "services": {
+        "visualiserBars": 60,
+        "weatherUnits": "Celsius"
+    },
+    "utilities": {
+        "quickToggles": [
+            {
+                "enabled": true,
+                "id": "wifi"
+            },
+            {
+                "enabled": true,
+                "id": "bluetooth"
+            },
+            {
+                "enabled": true,
+                "id": "mic"
+            },
+            {
+                "enabled": true,
+                "id": "settings"
+            },
+            {
+                "enabled": true,
+                "id": "gameMode"
+            },
+            {
+                "enabled": true,
+                "id": "dnd"
+            },
+            {
+                "enabled": false,
+                "id": "vpn"
+            }
+        ]
+    }
+}
