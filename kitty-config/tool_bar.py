@@ -126,7 +126,7 @@ def draw_tab(
     room = max(max_title_length - 5, 4)
     if len(title) > room:
         title = title[: room - 1] + "\u2026"
-    screen.draw(f"{index} {title}")
+    screen.draw(f"{index}⎪{title}")
 
     # Right cap + gap between tabs
     _set(screen, bg, BAR_BG)
@@ -139,7 +139,7 @@ def draw_tab(
         now = datetime.now()
         clock = f"  {ICON_CLOCK} {now:%H:%M}  "
         ip, color = net_status()
-        net = "" if IP_ON_LEFT else f"  {ICON_WIFI}  w{ip}"
+        net = "" if IP_ON_LEFT else f"  {ICON_WIFI}  {ip}"
 
         pad = screen.columns - screen.cursor.x - len(net) - len(clock)
         if pad > 0:
