@@ -18,7 +18,7 @@ ACTIVE_BG = 0xD7B8FF    # Active capsule background (whitish purple)
 ACTIVE_FG = 0x120A21    # Active text color (matches terminal background)
 TEXT = 0xD7CAEF         # General text color (matches terminal foreground)
 ACCENT = 0xD7B8FF       # Arch logo
-VPN_COLOR = 0xE9DDFF    # IP color when tun0 is up (pale lavender)
+VPN_COLOR = 0xE6FFC4   # IP color when tun0 is up (pale lavender)
 NOVPN_COLOR = 0xFFC4C4  # IP color when tun0 is down (whitish red)
 VPN_IFACE = "tun0"
 
