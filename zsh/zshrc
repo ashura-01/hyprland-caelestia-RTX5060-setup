@@ -144,7 +144,7 @@ TRAPWINCH() {
 configure_prompt() {
     case "$PROMPT_ALTERNATIVE" in
                 twoline)
-            PROMPT="%F{#E3FFEA}[%n%F{\${KENJI_COLOR}}㉿%F{#E3FFEA}%m]─[%F{#B7B0D9}\${PROMPT_PATH}%F{#E3FFEA}]%f
+            PROMPT="%F{#E3FFEA}[%n%F{\${KENJI_COLOR}}㉿%F{#E3FFEA}%m] %F{#ADA9BA}\${PROMPT_PATH}%F{#E3FFEA}%f
 %F{#E3FFEA} %f"
             ;;
         oneline)
@@ -295,7 +295,7 @@ export GTK_THEME=Adwaita:dark
 # Claude Code -> OpenRouter Route Configuration
 export ANTHROPIC_BASE_URL="https://integrate.api.nvidia.com/v1"
 # export ANTHROPIC_AUTH_TOKEN=""
-export ANTHROPIC_API_KEY="nvapi-xxxxxxxxxxxx-3nJZzEdiuE5gVrYITac"
+export ANTHROPIC_API_KEY="nvapi-xxxxxxxxxxxxxx-3nJZzEdiuE5gVrYITac"
 # Enforce your custom NVIDIA Nemotron Free Model
 export ANTHROPIC_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
 
@@ -309,3 +309,5 @@ export PATH="$HOME/.local/bin:$PATH"
 #alias hermes="HERMES_PLAIN_HIGHLIGHTS=1 hermes"
 
 alias wireshark='wireshark -style fusion'
+bindkey '^[[H' beginning-of-line
+bindkey '^[[F' end-of-line
