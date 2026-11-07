@@ -1,6 +1,17 @@
 -- Hyprland Lua config (Caelestia shell)
 -- https://wiki.hypr.land/configuring/
 
+----------------------
+---- Window rule -----
+----------------------
+hl.window_rule({ match = { class = "org.kde.dolphin" }, opacity = "0.85 override 0.85 override" })
+
+
+
+
+
+
+
 
 ------------------
 ---- MONITORS ----
@@ -31,6 +42,7 @@ hl.on("hyprland.start", function ()
 hl.exec_cmd("caelestia shell -d")
 hl.exec_cmd("systemctl --user start hyprpolkitagent")
 hl.exec_cmd("sh -c 'sleep 4 && hyprctl setcursor breeze_cursors 24'")
+hl.exec_cmd("clipse -listen")
 end)
 
 
@@ -88,7 +100,7 @@ if not f then return fallback end
             },
 
             decoration = {
-                rounding       = 12,
+                rounding       = 10,
                 rounding_power = 2,
 
                 active_opacity   = 1.0,
@@ -187,6 +199,12 @@ if not f then return fallback end
             },
         })
 
+        hl.layer_rule({
+            name  = "fuzzel-slide",
+            match = { namespace = "launcher" },
+            animation = "slide bottom",
+        })
+
 
         ---------------
         ---- INPUT ----
@@ -225,7 +243,7 @@ if not f then return fallback end
         hl.bind(mainMod .. " + Q",         hl.dsp.exec_cmd("kitty"))
         hl.bind(mainMod .. " + C",         hl.dsp.window.close())
         hl.bind(mainMod .. " + E",         hl.dsp.exec_cmd("dolphin"))
-        hl.bind(mainMod .. " + V",         hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu | cliphist decode | wl-copy"))
+        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu --config ~/.config/fuzzel/clipboard.ini | cliphist decode | wl-copy"))
         hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.float({ action = "toggle" }))
         hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen())
         hl.bind(mainMod .. " + P",         hl.dsp.window.pseudo())
