@@ -15,13 +15,14 @@
             "scale": 0.5
         },
         "spacing": {
-            "scale": 2
+            "scale": 0.6
         },
         "transparency": {
-            "enabled": false
+            "enabled": true
         }
     },
     "background": {
+        "enabled": true,
         "desktopClock": {
             "background": {
                 "blur": false,
@@ -35,14 +36,17 @@
             }
         },
         "visualiser": {
-            "enabled": false
+            "enabled": true,
+            "autoHide": false,
+            "rounding": 1,
+            "spacing": 1
         }
     },
     "bar": {
         "clock": {
             "background": true,
             "showDate": true,
-            "showSeconds": false
+            "showIcon": true
         },
         "popouts": {
             "tray": false
@@ -84,7 +88,7 @@
             "activeIndicator": true,
             "activeLabel": "",
             "activeTrail": true,
-            "displayType": "Text",
+            "displayType": "text",
             "label": "",
             "occupiedBg": true,
             "occupiedLabel": "",
@@ -102,6 +106,11 @@
         "resourceUpdateInterval": 5000
     },
     "general": {
+        "apps": {
+            "explorer": [
+                "dolphin"
+            ]
+        },
         "logo": "/usr/share/pixmaps/archlinux-logo.svg"
     },
     "launcher": {
@@ -113,10 +122,11 @@
         "networkRescanInterval": 120000
     },
     "paths": {
-        "sessionGif": ""
+        "sessionGif": "/home/ashura/Pictures/gifs/purple.gif"
     },
     "services": {
-        "visualiserBars": 10
+        "visualiserBars": 60,
+        "weatherUnits": "Celsius"
     },
     "utilities": {
         "quickToggles": [
