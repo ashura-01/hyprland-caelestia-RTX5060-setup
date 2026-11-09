@@ -5,6 +5,10 @@
         },
         "sidebar": {
             "width": 400
+        },
+        "launcher": {
+            "itemWidth": 420,
+            "itemHeight": 44
         }
     }
 }
