@@ -15,10 +15,10 @@
             "scale": 0.5
         },
         "spacing": {
-            "scale": 2
+            "scale": 1.6
         },
         "transparency": {
-            "enabled": false
+            "enabled": true
         }
     },
     "background": {
@@ -88,7 +88,7 @@
             "activeIndicator": true,
             "activeLabel": "",
             "activeTrail": true,
-            "displayType": "Text",
+            "displayType": "text",
             "label": "",
             "occupiedBg": true,
             "occupiedLabel": "",
@@ -122,10 +122,10 @@
         "networkRescanInterval": 120000
     },
     "paths": {
-        "sessionGif": "/home/ashura/Pictures/Wallpapers/gifs/purple.gif"
+        "sessionGif": "/home/ashura/Pictures/gifs/purple.gif"
     },
     "services": {
-        "visualiserBars": 60,
+        "visualiserBars": 70,
         "weatherUnits": "Celsius"
     },
     "utilities": {
