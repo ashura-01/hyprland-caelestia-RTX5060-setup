@@ -244,7 +244,7 @@ precmd() {
 
    # Set kenji (㉿) color based on venv state
    if [[ -n "$VIRTUAL_ENV" ]]; then
-       KENJI_COLOR="#D3FF7A"   # venv active
+       KENJI_COLOR="#FFCCCC"   # venv active
    else
        KENJI_COLOR="#D9C4FF"   # no venv
    fi
@@ -292,12 +292,21 @@ fi
 # App Custom Variables
 export GTK_THEME=Adwaita:dark
 
+
+
+#===========================================================
+
 # Claude Code -> OpenRouter Route Configuration
-export ANTHROPIC_BASE_URL="https://integrate.api.nvidia.com/v1"
+export ANTHROPIC_BASE_URL="http://127.0.0.1:4000"
 # export ANTHROPIC_AUTH_TOKEN=""
-export ANTHROPIC_API_KEY="nvapi-xxxxxxxxxxxxxx-3nJZzEdiuE5gVrYITac"
+export ANTHROPIC_API_KEY="dummy"
+# export DISABLE_PROMPT_CACHING=1
+export CLAUDE_CODE_DISABLE_EXPERIMENTAL_BETAS=1
+export CLAUDE_CODE_MAX_CONTEXT_TOKENS=131072
 # Enforce your custom NVIDIA Nemotron Free Model
-export ANTHROPIC_MODEL="nvidia/nemotron-3-ultra-550b-a55b"
+# export ANTHROPIC_MODEL="sonnet5"
+
+#============================================================
 
 export NVM_DIR="$HOME/.nvm"
 [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
