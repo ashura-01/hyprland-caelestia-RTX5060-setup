@@ -34,7 +34,7 @@ Item {
     // Re-evaluates only when safePrimary changes (wallpaper/scheme change) — not per frame, no polling.
     readonly property var coreColors: {
         const baseHue = root.safePrimary.hsvHue;
-        const sat = Math.max(0.55, root.safePrimary.hsvSaturation);
+        const sat = Math.max(0.25, root.safePrimary.hsvSaturation);
         const val = Math.max(0.8, root.safePrimary.hsvValue);
         const colors = [];
         for (let i = 0; i < 12; i++) {
@@ -297,7 +297,7 @@ Item {
                                     Layout.preferredHeight: Math.max(6 * root.clockScale, modelData * 85 * root.clockScale)
                                     radius: 2
                                     color: root.coreColors[index % root.coreColors.length]
-                                    opacity: 0.4 + modelData * 0.3
+                                    opacity: 0.5 + modelData * 0.3
 
                                     Behavior on Layout.preferredHeight {
                                         Anim {}
