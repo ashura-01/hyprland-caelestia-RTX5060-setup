@@ -36,7 +36,7 @@ Item {
     property var _prevTotal: []
 
     readonly property real statsCardWidth: Math.max(layout.implicitWidth, 320 * root.clockScale)
-    readonly property color cardBg: Qt.alpha(Colours.palette.m3surface, 0.35)
+    readonly property color cardBg: Qt.alpha(Colours.palette.m3surface, 0.2)
     readonly property color cardBorder: Qt.alpha(root.safePrimary, 0.35)
 
     implicitWidth: outerColumn.implicitWidth + (Tokens.padding.large * 4 * root.clockScale)
@@ -175,7 +175,7 @@ Item {
                     // ---- Network section ----
                     ColumnLayout {
                         Layout.fillWidth: true
-                        spacing: Tokens.spacing.small * root.clockScale
+                        spacing: Tokens.spacing.extraSmall * root.clockScale
 
                         RowLayout {
                             spacing: Tokens.spacing.small * root.clockScale
@@ -212,8 +212,13 @@ Item {
                         }
 
                         SparklineItem {
+                            id: netSparkline
+
+                            property real targetMax: 1024
+                            property real smoothMax: targetMax
+
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 72 * root.clockScale
+                            Layout.preferredHeight: 56 * root.clockScale
 
                             line1: NetworkUsage.uploadBuffer // qmllint disable missing-type
                             line1Color: root.safeSecondary
@@ -221,8 +226,32 @@ Item {
                             line2: NetworkUsage.downloadBuffer // qmllint disable missing-type
                             line2Color: root.safeTertiary
                             line2FillAlpha: 0.2
-                            maxValue: Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024)
+                            maxValue: smoothMax
                             historyLength: NetworkUsage.historyLength
+
+                            Connections {
+                                function onValuesChanged(): void {
+                                    netSparkline.targetMax = Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024);
+                                    netSlideAnim.restart();
+                                }
+
+                                target: NetworkUsage.downloadBuffer
+                            }
+
+                            NumberAnimation {
+                                id: netSlideAnim
+
+                                target: netSparkline
+                                property: "slideProgress"
+                                from: 0
+                                to: 1
+                                easing.type: Easing.Linear
+                                duration: GlobalConfig.dashboard.resourceUpdateInterval
+                            }
+
+                            Behavior on smoothMax {
+                                Anim {}
+                            }
                         }
                     }
 
@@ -236,9 +265,12 @@ Item {
                     // ---- CPU section ----
                     RowLayout {
                         Layout.fillWidth: true
+                        Layout.preferredHeight: 85 * root.clockScale
                         spacing: Tokens.spacing.medium * root.clockScale
 
                         RowLayout {
+                            Layout.alignment: Qt.AlignBottom
+                            Layout.bottomMargin: 6 * root.clockScale
                             spacing: Tokens.spacing.small * root.clockScale
 
                             MaterialIcon {
@@ -257,7 +289,8 @@ Item {
 
                         RowLayout {
                             Layout.fillWidth: true
-                            Layout.preferredHeight: 130 * root.clockScale
+                            Layout.fillHeight: true
+                            Layout.alignment: Qt.AlignBottom
                             spacing: 3 * root.clockScale
 
                             Repeater {
@@ -268,7 +301,7 @@ Item {
 
                                     Layout.fillWidth: true
                                     Layout.alignment: Qt.AlignBottom
-                                    Layout.preferredHeight: Math.max(6 * root.clockScale, modelData * 130 * root.clockScale)
+                                    Layout.preferredHeight: Math.max(6 * root.clockScale, modelData * 85 * root.clockScale)
                                     radius: 2
                                     color: root.safePrimary
                                     opacity: 0.45 + modelData * 0.55
