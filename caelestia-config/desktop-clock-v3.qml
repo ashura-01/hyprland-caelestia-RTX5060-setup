@@ -250,32 +250,32 @@ Item {
                         Layout.preferredHeight: 85 * root.clockScale
                         spacing: Tokens.spacing.medium * root.clockScale
 
-                        ColumnLayout {
+                        RowLayout {
                             Layout.alignment: Qt.AlignBottom
                             Layout.bottomMargin: 6 * root.clockScale
-                            spacing: 0
+                            spacing: Tokens.spacing.small * root.clockScale
 
-                            RowLayout {
-                                spacing: Tokens.spacing.small * root.clockScale
+                            MaterialIcon {
+                                text: "memory"
+                                fill: 1
+                                color: root.safePrimary
+                                fontStyle: Tokens.font.icon.size(16 * root.clockScale).build()
+                            }
 
-                                MaterialIcon {
-                                    text: "memory"
-                                    fill: 1
-                                    color: root.safePrimary
-                                    fontStyle: Tokens.font.icon.size(16 * root.clockScale).build()
-                                }
+                            ColumnLayout {
+                                spacing: 0
 
                                 StyledText {
                                     text: "CPU"
                                     font: Tokens.font.title.size(12 * root.clockScale).weight(Font.DemiBold).build()
                                     color: root.safePrimary
                                 }
-                            }
 
-                            StyledText {
-                                text: Strings.percentOne(Cpu.percentage)
-                                font: Tokens.font.title.size(18 * root.clockScale).weight(Font.Bold).build()
-                                color: root.safePrimary
+                                StyledText {
+                                    text: Strings.percentOne(Cpu.percentage)
+                                    font: Tokens.font.title.size(18 * root.clockScale).weight(Font.Bold).build()
+                                    color: root.safePrimary
+                                }
                             }
                         }
 
@@ -553,3 +553,4 @@ Item {
         }
     }
 }
+
