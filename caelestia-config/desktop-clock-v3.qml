@@ -1,0 +1,555 @@
+// /etc/xdg/quickshell/caelestia/modules/background/DesktopClock.qml
+pragma ComponentBehavior: Bound
+
+import QtQuick
+import QtQuick.Effects
+import QtQuick.Layouts
+import Quickshell.Io
+import Caelestia.Components
+import Caelestia.Config
+import Caelestia.I18n
+import Caelestia.Services
+import qs.components
+import qs.components.controls
+import qs.services
+import qs.utils
+
+Item {
+    id: root
+
+    required property Item wallpaper
+    required property real absX
+    required property real absY
+
+    property real clockScale: Config.background.desktopClock.scale
+    readonly property bool bgEnabled: Config.background.desktopClock.background.enabled
+    readonly property bool blurEnabled: bgEnabled && Config.background.desktopClock.background.blur && !GameMode.enabled
+    readonly property bool invertColors: Config.background.desktopClock.invertColors
+    readonly property bool useLightSet: Colours.light ? !invertColors : invertColors
+    readonly property color safePrimary: useLightSet ? Colours.palette.m3primaryContainer : Colours.palette.m3primary
+    readonly property color safeSecondary: useLightSet ? Colours.palette.m3secondaryContainer : Colours.palette.m3secondary
+    readonly property color safeTertiary: useLightSet ? Colours.palette.m3tertiaryContainer : Colours.palette.m3tertiary
+
+    // 12 distinct colors generated from the current accent, rotated around the hue wheel.
+    // Re-evaluates only when safePrimary changes (wallpaper/scheme change) — not per frame, no polling.
+    readonly property var coreColors: {
+        const baseHue = root.safePrimary.hsvHue;
+        const sat = Math.max(0.55, root.safePrimary.hsvSaturation);
+        const val = Math.max(0.8, root.safePrimary.hsvValue);
+        const colors = [];
+        for (let i = 0; i < 12; i++) {
+            colors.push(Qt.hsva((baseHue + i / 12) % 1.0, sat, val, 1.0));
+        }
+        return colors;
+    }
+
+    // ---- per-core CPU usage (Cpu singleton only exposes the aggregate, so we read /proc/stat ourselves) ----
+    property var coreLoads: []
+    property var _prevIdle: []
+    property var _prevTotal: []
+
+    readonly property real statsCardWidth: Math.max(layout.implicitWidth, 500 * root.clockScale)
+    readonly property color cardBg: Qt.alpha(Colours.palette.m3surface, 0.3)
+    readonly property color cardBorder: Qt.alpha(root.safePrimary, 0.35)
+
+    implicitWidth: outerColumn.implicitWidth + (Tokens.padding.large * 4 * root.clockScale)
+    implicitHeight: outerColumn.implicitHeight + (Tokens.padding.extraLargeIncreased * root.clockScale)
+
+    ServiceRef {
+        service: Cpu
+    }
+
+    ServiceRef {
+        service: Memory
+    }
+
+    ServiceRef {
+        service: Gpu
+    }
+
+    ServiceRef {
+        service: NetworkUsage
+    }
+
+    // ---- /proc/stat reader (FileView, not Process — simpler and more reliably supported) ----
+    FileView {
+        id: statFile
+
+        path: "/proc/stat"
+
+        onLoaded: {
+            const content = text();
+            const lines = content.split("\n").filter(l => /^cpu[0-9]/.test(l));
+            const idles = [];
+            const totals = [];
+            const usages = [];
+
+            for (let i = 0; i < lines.length; i++) {
+                const f = lines[i].trim().split(/\s+/).slice(1).map(Number);
+                const idle = f[3] + (f[4] || 0);
+                const total = f.reduce((a, b) => a + b, 0);
+
+                idles.push(idle);
+                totals.push(total);
+
+                const prevIdle = root._prevIdle[i];
+                const prevTotal = root._prevTotal[i];
+                if (prevIdle !== undefined && prevTotal !== undefined) {
+                    const dIdle = idle - prevIdle;
+                    const dTotal = total - prevTotal;
+                    usages.push(dTotal > 0 ? Math.max(0, Math.min(1, 1 - dIdle / dTotal)) : 0);
+                } else {
+                    usages.push(0);
+                }
+            }
+
+            root._prevIdle = idles;
+            root._prevTotal = totals;
+            root.coreLoads = usages;
+        }
+    }
+
+    Timer {
+        interval: 1500
+        running: true
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: statFile.reload()
+    }
+
+    Item {
+        id: clockContainer
+
+        anchors.fill: parent
+
+        layer.enabled: Config.background.desktopClock.shadow.enabled
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Colours.palette.m3shadow
+            shadowOpacity: Config.background.desktopClock.shadow.opacity
+            shadowBlur: Config.background.desktopClock.shadow.blur
+        }
+
+        ColumnLayout {
+            id: outerColumn
+
+            anchors.centerIn: parent
+            spacing: Tokens.spacing.medium * root.clockScale
+
+            // ---- Single unified stats card (no background plate — intentionally plain) ----
+            StyledRect {
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: root.statsCardWidth
+                color: root.cardBg
+                border.color: root.cardBorder
+                border.width: 1
+                radius: Tokens.rounding.large * root.clockScale
+                implicitWidth: statsColumn.implicitWidth + Tokens.padding.large * 2 * root.clockScale
+                implicitHeight: statsColumn.implicitHeight + Tokens.padding.medium * 2 * root.clockScale
+
+                ColumnLayout {
+                    id: statsColumn
+
+                    anchors.centerIn: parent
+                    width: parent.width - Tokens.padding.large * 2 * root.clockScale
+                    spacing: Tokens.spacing.medium * root.clockScale
+
+                    // ---- Network section ----
+                    ColumnLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.extraSmall * root.clockScale
+
+                        RowLayout {
+                            spacing: Tokens.spacing.small * root.clockScale
+
+                            MaterialIcon {
+                                text: "wifi"
+                                fill: 1
+                                color: root.safePrimary
+                                fontStyle: Tokens.font.icon.size(16 * root.clockScale).build()
+                            }
+
+                            StyledText {
+                                text: "↑ " + Units.formatBytes(NetworkUsage.uploadSpeed ?? 0, true)
+                                font: Tokens.font.body.size(11 * root.clockScale).weight(Font.Medium).build()
+                                color: root.safeSecondary
+                            }
+
+                            StyledRect {
+                                implicitWidth: 1 * root.clockScale
+                                implicitHeight: 12 * root.clockScale
+                                color: root.safePrimary
+                                opacity: 0.4
+                            }
+
+                            StyledText {
+                                text: "↓ " + Units.formatBytes(NetworkUsage.downloadSpeed ?? 0, true)
+                                font: Tokens.font.body.size(11 * root.clockScale).weight(Font.Medium).build()
+                                color: root.safeTertiary
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+                        }
+
+                        SparklineItem {
+                            id: netSparkline
+
+                            property real targetMax: 1024
+                            property real smoothMax: targetMax
+
+                            Layout.fillWidth: true
+                            Layout.preferredHeight: 56 * root.clockScale
+
+                            line1: NetworkUsage.uploadBuffer // qmllint disable missing-type
+                            line1Color: root.safeSecondary
+                            line1FillAlpha: 0.15
+                            line2: NetworkUsage.downloadBuffer // qmllint disable missing-type
+                            line2Color: root.safeTertiary
+                            line2FillAlpha: 0.2
+                            maxValue: smoothMax
+                            historyLength: NetworkUsage.historyLength
+
+                            Connections {
+                                function onValuesChanged(): void {
+                                    netSparkline.targetMax = Math.max(NetworkUsage.downloadBuffer.maximum, NetworkUsage.uploadBuffer.maximum, 1024);
+                                    netSlideAnim.restart();
+                                }
+
+                                target: NetworkUsage.downloadBuffer
+                            }
+
+                            NumberAnimation {
+                                id: netSlideAnim
+
+                                target: netSparkline
+                                property: "slideProgress"
+                                from: 0
+                                to: 1
+                                easing.type: Easing.Linear
+                                duration: GlobalConfig.dashboard.resourceUpdateInterval
+                            }
+
+                            Behavior on smoothMax {
+                                Anim {}
+                            }
+                        }
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: root.safePrimary
+                        opacity: 0.25
+                    }
+
+                    // ---- CPU section ----
+                    RowLayout {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: 85 * root.clockScale
+                        spacing: Tokens.spacing.medium * root.clockScale
+
+                        ColumnLayout {
+                            Layout.alignment: Qt.AlignBottom
+                            Layout.bottomMargin: 6 * root.clockScale
+                            spacing: 0
+
+                            RowLayout {
+                                spacing: Tokens.spacing.small * root.clockScale
+
+                                MaterialIcon {
+                                    text: "memory"
+                                    fill: 1
+                                    color: root.safePrimary
+                                    fontStyle: Tokens.font.icon.size(16 * root.clockScale).build()
+                                }
+
+                                StyledText {
+                                    text: "CPU"
+                                    font: Tokens.font.title.size(12 * root.clockScale).weight(Font.DemiBold).build()
+                                    color: root.safePrimary
+                                }
+                            }
+
+                            StyledText {
+                                text: Strings.percentOne(Cpu.percentage)
+                                font: Tokens.font.title.size(18 * root.clockScale).weight(Font.Bold).build()
+                                color: root.safePrimary
+                            }
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            Layout.fillHeight: true
+                            Layout.alignment: Qt.AlignBottom
+                            spacing: 3 * root.clockScale
+
+                            Repeater {
+                                model: root.coreLoads
+
+                                Rectangle {
+                                    required property real modelData
+                                    required property int index
+
+                                    Layout.fillWidth: true
+                                    Layout.alignment: Qt.AlignBottom
+                                    Layout.preferredHeight: Math.max(6 * root.clockScale, modelData * 85 * root.clockScale)
+                                    radius: 2
+                                    color: root.coreColors[index % root.coreColors.length]
+                                    opacity: 0.4 + modelData * 0.3
+
+                                    Behavior on Layout.preferredHeight {
+                                        Anim {}
+                                    }
+
+                                    Behavior on opacity {
+                                        Anim {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    StyledRect {
+                        Layout.fillWidth: true
+                        implicitHeight: 1
+                        color: root.safePrimary
+                        opacity: 0.25
+                    }
+
+                    // ---- GPU + MEM section ----
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Tokens.spacing.medium * root.clockScale
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small * root.clockScale
+                            visible: Gpu.type !== GpuType.None
+
+                            MaterialIcon {
+                                text: "developer_board"
+                                fill: 1
+                                color: root.safeSecondary
+                                fontStyle: Tokens.font.icon.size(16 * root.clockScale).build()
+                            }
+
+                            ColumnLayout {
+                                spacing: 0
+
+                                StyledText {
+                                    text: "GPU"
+                                    font: Tokens.font.title.size(12 * root.clockScale).weight(Font.DemiBold).build()
+                                    color: root.safeSecondary
+                                }
+
+                                StyledText {
+                                    text: Strings.percentOne(Gpu.percentage)
+                                    font: Tokens.font.title.size(18 * root.clockScale).weight(Font.Bold).build()
+                                    color: root.safePrimary
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            CircularProgress {
+                                implicitSize: 44 * root.clockScale
+                                strokeWidth: 4 * root.clockScale
+                                spacing: 0
+                                value: Gpu.percentage
+                                fgColour: root.safeSecondary
+
+                                Behavior on clampedVal {
+                                    Anim {}
+                                }
+                            }
+                        }
+
+                        StyledRect {
+                            Layout.fillHeight: true
+                            Layout.preferredWidth: 1 * root.clockScale
+                            implicitHeight: 48 * root.clockScale
+                            color: root.safePrimary
+                            opacity: 0.35
+                        }
+
+                        RowLayout {
+                            Layout.fillWidth: true
+                            spacing: Tokens.spacing.small * root.clockScale
+
+                            MaterialIcon {
+                                text: "memory_alt"
+                                fill: 1
+                                color: root.safeTertiary
+                                fontStyle: Tokens.font.icon.size(16 * root.clockScale).build()
+                            }
+
+                            ColumnLayout {
+                                spacing: 0
+
+                                StyledText {
+                                    text: "MEM"
+                                    font: Tokens.font.title.size(12 * root.clockScale).weight(Font.DemiBold).build()
+                                    color: root.safeTertiary
+                                }
+
+                                StyledText {
+                                    text: Strings.percentOne(Memory.percentage)
+                                    font: Tokens.font.title.size(18 * root.clockScale).weight(Font.Bold).build()
+                                    color: root.safePrimary
+                                }
+                            }
+
+                            Item {
+                                Layout.fillWidth: true
+                            }
+
+                            CircularProgress {
+                                implicitSize: 44 * root.clockScale
+                                strokeWidth: 4 * root.clockScale
+                                spacing: 0
+                                value: Memory.percentage
+                                fgColour: root.safeTertiary
+
+                                Behavior on clampedVal {
+                                    Anim {}
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            // ---- Clock, now in its own wrapper with its own dedicated background plate ----
+            Item {
+                id: clockWrapper
+
+                Layout.alignment: Qt.AlignHCenter
+                implicitWidth: layout.implicitWidth + Tokens.padding.large * 2 * root.clockScale
+                implicitHeight: layout.implicitHeight + Tokens.padding.medium * 2 * root.clockScale
+
+                StyledRect {
+                    id: clockBgPlate
+
+                    visible: root.bgEnabled
+                    anchors.fill: parent
+                    radius: Tokens.rounding.extraLarge * root.clockScale
+                    opacity: Config.background.desktopClock.background.opacity
+                    color: Colours.palette.m3surface
+
+                    layer.enabled: root.blurEnabled
+                }
+
+                Loader {
+                    asynchronous: true
+                    anchors.fill: parent
+                    active: root.blurEnabled
+
+                    sourceComponent: MultiEffect {
+                        source: ShaderEffectSource {
+                            sourceItem: root.wallpaper
+                            sourceRect: Qt.rect(root.absX + outerColumn.x + clockWrapper.x, root.absY + outerColumn.y + clockWrapper.y, clockWrapper.width, clockWrapper.height)
+                        }
+                        maskSource: clockBgPlate
+                        maskEnabled: true
+                        blurEnabled: true
+                        blur: 1
+                        blurMax: 64
+                        autoPaddingEnabled: false
+                    }
+                }
+
+                RowLayout {
+                    id: layout
+
+                    anchors.centerIn: parent
+                    spacing: Tokens.spacing.large * root.clockScale
+
+                    RowLayout {
+                        spacing: Tokens.spacing.small
+
+                        StyledText {
+                            text: Time.hourStr
+                            font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * 3 * root.clockScale).weight(Font.Bold).build()
+                            color: root.safePrimary
+                        }
+
+                        StyledText {
+                            text: ":"
+                            font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * 3 * root.clockScale).build()
+                            color: root.safeTertiary
+                            opacity: 0.8
+                            Layout.topMargin: -Tokens.padding.large * 1.5 * root.clockScale
+                        }
+
+                        StyledText {
+                            text: Time.minuteStr
+                            font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * 3 * root.clockScale).weight(Font.Bold).build()
+                            color: root.safeSecondary
+                        }
+
+                        Loader {
+                            asynchronous: true
+                            Layout.alignment: Qt.AlignTop
+                            Layout.topMargin: Tokens.padding.large * 1.4 * root.clockScale
+
+                            active: Units.twelveHourClock
+                            visible: active
+
+                            sourceComponent: StyledText {
+                                text: Time.amPmStr
+                                font: Tokens.font.clock.size(Tokens.font.title.medium.pointSize * root.clockScale).build()
+                                color: root.safeSecondary
+                            }
+                        }
+                    }
+
+                    StyledRect {
+                        Layout.fillHeight: true
+                        Layout.preferredWidth: 4 * root.clockScale
+                        Layout.topMargin: Tokens.spacing.large * root.clockScale
+                        Layout.bottomMargin: Tokens.spacing.large * root.clockScale
+                        radius: Tokens.rounding.full
+                        color: root.safePrimary
+                        opacity: 0.8
+                    }
+
+                    ColumnLayout {
+                        spacing: 0
+
+                        StyledText {
+                            text: Time.format("MMMM").toUpperCase()
+                            font: Tokens.font.clock.size(Tokens.font.title.medium.pointSize * root.clockScale).letterSpacing(4).weight(Font.Bold).build()
+                            color: root.safeSecondary
+                        }
+
+                        StyledText {
+                            text: Time.format("dd")
+                            font: Tokens.font.clock.size(Tokens.font.headline.medium.pointSize * root.clockScale).letterSpacing(2).weight(Font.Medium).build()
+                            color: root.safePrimary
+                        }
+
+                        StyledText {
+                            text: Time.format("dddd")
+                            font: Tokens.font.clock.size(Tokens.font.body.large.pointSize * root.clockScale).letterSpacing(2).build()
+                            color: root.safeSecondary
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    Behavior on clockScale {
+        Anim {}
+    }
+
+    Behavior on implicitWidth {
+        Anim {
+            type: Anim.StandardSmall
+        }
+    }
+}
