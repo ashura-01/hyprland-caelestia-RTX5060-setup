@@ -66,7 +66,7 @@ Item {
 
                     anchors.centerIn: parent
                     visible: device.showBattery
-                    implicitSize: 26
+                    implicitSize: 22
                     strokeWidth: 2
                     spacing: 0
                     value: device.showBattery ? device.modelData.battery : 0
