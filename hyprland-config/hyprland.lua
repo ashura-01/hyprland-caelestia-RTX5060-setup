@@ -70,14 +70,10 @@ hl.env("QT_QPA_PLATFORMTHEME", "kde")
 -----------------------
 
 local function scheme_colour(key, alpha, fallback)
-local f = io.open(os.getenv("HOME") .. "/.local/state/caelestia/scheme.json", "r")
-if not f then return fallback end
-    local txt = f:read("*a")
-    f:close()
-    local hex = txt:match('"' .. key .. '"%s*:%s*"#?(%x%x%x%x%x%x)"')
-    if not hex then return fallback end
-        return "rgba(" .. hex .. alpha .. ")"
-        end
+local ok, scheme = pcall(require, os.getenv("HOME") .. "/.config/hypr/scheme/current")
+if not ok or type(scheme) ~= "table" or not scheme[key] then return fallback end
+    return "rgba(" .. scheme[key] .. alpha .. ")"
+    end
 
         local active_border   = scheme_colour("primary",        "ff", "rgba(e9d5ffff)")
         local inactive_border = scheme_colour("outlineVariant", "66", "rgba(3b2f5c66)")
@@ -85,7 +81,7 @@ if not f then return fallback end
         hl.config({
             general = {
                 gaps_in  = 3,
-                gaps_out = 8,
+                gaps_out = 9,
 
                 border_size = 1,
 
@@ -243,7 +239,7 @@ if not f then return fallback end
         hl.bind(mainMod .. " + Q",         hl.dsp.exec_cmd("kitty"))
         hl.bind(mainMod .. " + C",         hl.dsp.window.close())
         hl.bind(mainMod .. " + E",         hl.dsp.exec_cmd("dolphin"))
-        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("cliphist list | fuzzel --dmenu --config ~/.config/fuzzel/clipboard.ini | cliphist decode | wl-copy"))
+        hl.bind(mainMod .. " + V", hl.dsp.exec_cmd("~/.config/fuzzel/update-clipboard-theme.sh && cliphist list | fuzzel --dmenu --config ~/.config/fuzzel/clipboard.ini | cliphist decode | wl-copy"))
         hl.bind(mainMod .. " + SHIFT + V", hl.dsp.window.float({ action = "toggle" }))
         hl.bind(mainMod .. " + F",         hl.dsp.window.fullscreen())
         hl.bind(mainMod .. " + P",         hl.dsp.window.pseudo())
@@ -268,6 +264,7 @@ if not f then return fallback end
         hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
         hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
         hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
+        hl.bind(mainMod .. " + K", hl.dsp.exec_cmd("kate"))
         hl.dsp.window.swap({ direction = "left" })
 
         for i = 1, 10 do
