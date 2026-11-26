@@ -15,14 +15,13 @@
             "scale": 0.5
         },
         "spacing": {
-            "scale": 0.6
+            "scale": 1.6
         },
         "transparency": {
             "enabled": true
         }
     },
     "background": {
-        "enabled": true,
         "desktopClock": {
             "background": {
                 "blur": false,
@@ -35,21 +34,26 @@
                 "enabled": true
             }
         },
+        "enabled": true,
         "visualiser": {
+            "autoHide": true,
             "enabled": true,
-            "autoHide": false,
             "rounding": 1,
-            "spacing": 1
+            "spacing": 2
         }
     },
     "bar": {
+        "activeWindow": {
+            "compact": false,
+            "inverted": false
+        },
         "clock": {
             "background": true,
             "showDate": true,
-            "showIcon": true
+            "showSeconds": false
         },
         "popouts": {
-            "tray": false
+            "tray": true
         },
         "statusIcons": [
             {
@@ -82,20 +86,22 @@
             }
         ],
         "tray": {
-            "compact": true
+            "background": false,
+            "compact": true,
+            "recolour": true
         },
         "workspaces": {
             "activeIndicator": true,
             "activeLabel": "",
             "activeTrail": true,
-            "displayType": "text",
+            "displayType": "Text",
             "label": "",
             "occupiedBg": true,
             "occupiedLabel": "",
             "showUnoccupied": true,
             "showWindows": false,
             "showWindowsOnSpecialWorkspaces": true,
-            "shown": 5
+            "shown": 6
         }
     },
     "dashboard": {
@@ -109,6 +115,9 @@
         "apps": {
             "explorer": [
                 "dolphin"
+            ],
+            "terminal": [
+                "kitty"
             ]
         },
         "logo": "/usr/share/pixmaps/archlinux-logo.svg"
@@ -122,10 +131,10 @@
         "networkRescanInterval": 120000
     },
     "paths": {
-        "sessionGif": "/home/ashura/Pictures/gifs/purple.gif"
+        "sessionGif": "/home/ashura/Pictures/gifs/wolf.gif"
     },
     "services": {
-        "visualiserBars": 60,
+        "visualiserBars": 44,
         "weatherUnits": "Celsius"
     },
     "utilities": {
