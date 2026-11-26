@@ -1,7 +1,7 @@
 {
     "sizes": {
         "bar": {
-            "innerWidth": 25
+            "innerWidth": 24
         },
         "sidebar": {
             "width": 400
