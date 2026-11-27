@@ -1,0 +1,40 @@
+#!/usr/bin/env bash
+# Regenerates clipboard.ini colors from Caelestia's live scheme.json
+#kate ~/.config/fuzzel/update-clipboard-theme.sh
+SCHEME="$HOME/.local/state/caelestia/scheme.json"
+OUT="$HOME/.config/fuzzel/clipboard.ini"
+
+[ -f "$SCHEME" ] || exit 0  # bail silently if scheme not ready, keeps last-known ini
+
+bg=$(jq -r '.colours.background' "$SCHEME")
+text=$(jq -r '.colours.onBackground' "$SCHEME")
+primary=$(jq -r '.colours.primary' "$SCHEME")
+container=$(jq -r '.colours.primaryContainer' "$SCHEME")
+outline=$(jq -r '.colours.outline' "$SCHEME")
+
+cat > "$OUT" <<EOF
+[main]
+anchor=bottom
+y-margin=24
+width=60
+lines=10
+font=JetBrainsMono Nerd Font:size=10
+prompt="  "
+horizontal-pad=16
+vertical-pad=12
+inner-pad=8
+line-height=22
+
+[colors]
+background=${bg}f2
+text=${text}ff
+match=${primary}ff
+selection=${container}aa
+selection-text=${primary}ff
+selection-match=${primary}ff
+border=${primary}cc
+
+[border]
+width=1
+radius=12
+EOF
